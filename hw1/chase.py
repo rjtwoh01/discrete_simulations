@@ -37,10 +37,13 @@ class Ship(object):
         self.coordinates = Coordinates()
 
     def printPosition(self):
-        print('(', self.coordinates.x, ',', self.coordinates.y, ',', self.coordinates.z, ')')
+        print('(', "{:.2f}".format(self.coordinates.x), ',', "{:.2f}".format(self.coordinates.y), ',', "{:.2f}".format(self.coordinates.z), ')')
 
-    def updatePosition(self):
+    def increaseDistance(self):
         self.coordinates.setCoordinates((self.coordinates.x + (self.speed / 3)), (self.coordinates.y + (self.speed / 3)), (self.coordinates.z + (self.speed / 3)))
+
+    def decreaseDistance(self):
+        self.coordinates.setCoordinates((self.coordinates.x - (self.speed / 3)), (self.coordinates.y - (self.speed / 3)), (self.coordinates.z - (self.speed / 3)))
 
 # shipA = {
 #     speed = 0,
@@ -82,15 +85,21 @@ def main():
         print("Ship B position: ")
         shipB.printPosition()
 
-        shipA.updatePosition()
-        shipB.updatePosition()
+        shipA.increaseDistance()
+        
+        if shipB.coordinates.x > shipA.coordinates.x or shipB.coordinates.y > shipA.coordinates.y or shipB.coordinates.z > shipA.coordinates.z:
+            shipB.decreaseDistance()
+        else:
+            shipB.increaseDistance()
 
+        
         #d = sqrt((x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2)
         distance = math.sqrt(((shipA.coordinates.x - shipB.coordinates.x) ** 2) + ((shipA.coordinates.y - shipB.coordinates.y) ** 2) + ((shipA.coordinates.z - shipB.coordinates.z) ** 2))
 
         if distance <= 150:
             chaseInProgress = False
             caught = True
+
 
         tick(1)
         counter = counter + 1
