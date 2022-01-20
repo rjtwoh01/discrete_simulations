@@ -5,6 +5,10 @@ import time
 import random
 
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation as animation
+
 # import matplotlib.pyplot as plt
 
 #This program should accept initial parameters such as:
@@ -41,7 +45,7 @@ class Ship(object):
         self.coordinates = Coordinates()
         self.laserSpread = 0
         self.thrusterLikelihood = 0
-
+        self.history = [Coordinates()]
 
     def printPosition(self):
         print('(', "{:.2f}".format(self.coordinates.x), ',', "{:.2f}".format(self.coordinates.y), ',', "{:.2f}".format(self.coordinates.z), ')')
@@ -54,15 +58,6 @@ class Ship(object):
 
     def calculateTheta(self):
         self.coordinates.theta = np.arctan(self.coordinates.x / self.coordinates.y)
-
-# shipA = {
-#     speed = 0,
-#     initialPosition = {
-#         x: 0,
-#         y: 0,
-#         z: 0
-#     }
-# }
 
 def calculateTheta(shipA: Ship, shipB: Ship):
     theta = math.degrees(np.arctan((shipA.coordinates.x - shipB.coordinates.x) / (shipA.coordinates.y - shipB.coordinates.y)))
@@ -92,7 +87,7 @@ def main():
     ax = int(input("Input Ship A's x coordinate: "))
     ay = int(input("Input Ship A's y coordinate: "))
     az = int(input("Input Ship A's z coordinate: "))
-    thrustorOdds = int(input("Input Ship A's chance to find a thrustor (0-1): "))
+    thrustorOdds = int(input("Input Ship A's chance to find a thrustor (1-99): "))
     shipA.coordinates.setCoordinates(ax,ay,az)
     shipA.thrusterLikelihood = thrustorOdds
 
@@ -114,11 +109,18 @@ def main():
 
     shipAThrustorsRemaining = 0
 
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    ax.autoscale(enable=True, axis='both', tight=True)
+    
     while (chaseInProgress):
         print("Ship A position: ")
         shipA.printPosition()
         print("Ship B position: ")
         shipB.printPosition()
+
+        shipA.history.append(shipA.coordinates)
+        shipB.history.append(shipB.coordinates)
 
         shipA.increaseDistance()
         if (shipAThrustorsRemaining > 0):
@@ -148,14 +150,24 @@ def main():
         print('')
         print('-----------------------------------------------------------------------------')
         print('')
+        
+        ax.scatter3D(shipA.coordinates.x, shipA.coordinates.y, shipA.coordinates.z, color='green')
+        ax.scatter3D(shipB.coordinates.x, shipB.coordinates.y, shipB.coordinates.z, color='red')
 
-        if distance <= 150 and alpha <= shipB.laserSpread:
+        plt.show(block=False)
+        plt.pause(2)
+
+        if distance <= 50 and alpha <= shipB.laserSpread:
             chaseInProgress = False
             caught = True
+        else:
+            ax.scatter3D(shipA.coordinates.x, shipA.coordinates.y, shipA.coordinates.z, color='white')
+            ax.scatter3D(shipB.coordinates.x, shipB.coordinates.y, shipB.coordinates.z, color='white')
+            plt.pause(0.01)
 
-
-        tick(1)
         counter = counter + 1
+
+        
 
         if (counter >= totalPossibleLength): chaseInProgress = False
 
@@ -170,6 +182,8 @@ def main():
         print("Ship B caught ship A after", counter, "seconds; with distance of", "{:.2f}".format(distance), "meters between them")
     else:
         print("Ship A got away after ", counter, "seconds")
+
+    plt.show()
 
 if __name__ == "__main__":
     main()
