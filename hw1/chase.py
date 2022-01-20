@@ -4,7 +4,7 @@ import struct
 import time
 import random
 
-# import numpy as np
+import numpy as np
 # import matplotlib.pyplot as plt
 
 #This program should accept initial parameters such as:
@@ -25,16 +25,23 @@ class Coordinates(object):
         self.x = 0
         self.y = 0
         self.z = 0
+        self.theta = 0
+        self.alpha = 0
+        self.magnitude = 0
     
     def setCoordinates(self, x,y,z):
         self.x = x
         self.y = y
         self.z = z
+        self.magnitude = math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
 class Ship(object):
     def __init__(self):
         self.speed = 0
         self.coordinates = Coordinates()
+        self.laserSpread = 0
+        self.thrusterLikelihood = 0
+
 
     def printPosition(self):
         print('(', "{:.2f}".format(self.coordinates.x), ',', "{:.2f}".format(self.coordinates.y), ',', "{:.2f}".format(self.coordinates.z), ')')
@@ -45,6 +52,9 @@ class Ship(object):
     def decreaseDistance(self):
         self.coordinates.setCoordinates((self.coordinates.x - (self.speed / 3)), (self.coordinates.y - (self.speed / 3)), (self.coordinates.z - (self.speed / 3)))
 
+    def calculateTheta(self):
+        self.coordinates.theta = np.arctan(self.coordinates.x / self.coordinates.y)
+
 # shipA = {
 #     speed = 0,
 #     initialPosition = {
@@ -53,6 +63,23 @@ class Ship(object):
 #         z: 0
 #     }
 # }
+
+def calculateTheta(shipA: Ship, shipB: Ship):
+    theta = math.degrees(np.arctan((shipA.coordinates.x - shipB.coordinates.x) / (shipA.coordinates.y - shipB.coordinates.y)))
+    return theta
+
+# α = arccos[(a · b) / (|a| * |b|)]
+def calculateAlpha(shipA: Ship, shipB: Ship):
+    dotProduct = (shipA.coordinates.x * shipB.coordinates.x) + (shipA.coordinates.y * shipB.coordinates.y) + (shipA.coordinates.y * shipB.coordinates.y)
+    difference = (shipA.coordinates.x - shipB.coordinates.x) + (shipA.coordinates.y - shipB.coordinates.y) + (shipA.coordinates.z - shipB.coordinates.z)
+    alpha = math.degrees(np.arctan((dotProduct) / calculateDistance(shipA, shipB)))
+    # print()
+    return alpha
+
+def calculateDistance(shipA: Ship, shipB: Ship):
+    #d = sqrt((x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2)
+    distance = math.sqrt(((shipA.coordinates.x - shipB.coordinates.x) ** 2) + ((shipA.coordinates.y - shipB.coordinates.y) ** 2) + ((shipA.coordinates.z - shipB.coordinates.z) ** 2))
+    return distance
 
 def tick(seconds):
     time.sleep(seconds)
@@ -65,19 +92,27 @@ def main():
     ax = int(input("Input Ship A's x coordinate: "))
     ay = int(input("Input Ship A's y coordinate: "))
     az = int(input("Input Ship A's z coordinate: "))
+    thrustorOdds = int(input("Input Ship A's chance to find a thrustor (0-1): "))
     shipA.coordinates.setCoordinates(ax,ay,az)
+    shipA.thrusterLikelihood = thrustorOdds
 
     shipB.speed = int(input('Input the speed for Ship B: '))
     bx = int(input("Input Ship B's x coordinate: "))
     by = int(input("Input Ship B's y coordinate: "))
     bz = int(input("Input Ship B's z coordinate: "))
+    laser = int(input("Input Ship B's laser spread (degrees): "))
     shipB.coordinates.setCoordinates(bx,by,bz)
+    shipB.laserSpread = laser
 
     chaseInProgress = True
     caught = False
     counter = 0
 
-    totalPossibleLength = random.randrange(25, 10000001)
+    #The total time that shipB will be able to chase shipA
+    #Ranges from 30 seconds to 1 hour
+    totalPossibleLength = random.randrange(30, 3601)
+
+    shipAThrustorsRemaining = 0
 
     while (chaseInProgress):
         print("Ship A position: ")
@@ -86,6 +121,10 @@ def main():
         shipB.printPosition()
 
         shipA.increaseDistance()
+        if (shipAThrustorsRemaining > 0):
+            shipA.increaseDistance()
+            shipAThrustorsRemaining = shipAThrustorsRemaining - 1
+            print('ShipA used a thrustor with', shipAThrustorsRemaining, 'remaining')
         
         if shipB.coordinates.x > shipA.coordinates.x or shipB.coordinates.y > shipA.coordinates.y or shipB.coordinates.z > shipA.coordinates.z:
             shipB.decreaseDistance()
@@ -93,10 +132,20 @@ def main():
             shipB.increaseDistance()
 
         
-        #d = sqrt((x1-x2)^2 + (y1-y2)^2 + (z1-z2)^2)
-        distance = math.sqrt(((shipA.coordinates.x - shipB.coordinates.x) ** 2) + ((shipA.coordinates.y - shipB.coordinates.y) ** 2) + ((shipA.coordinates.z - shipB.coordinates.z) ** 2))
+        if random.randrange(0,100) < shipA.thrusterLikelihood and shipAThrustorsRemaining == 0:
+            shipAThrustorsRemaining = random.randrange(1, 6)
+            print("ShipA found a thrustor pack with", shipAThrustorsRemaining, "thrustors")
+        
+        
+        distance = calculateDistance(shipA, shipB)
+        alpha = calculateAlpha(shipA, shipB)
 
-        if distance <= 150:
+        print('The distance between the two is', "{:.2f}".format(distance), 'with an angle alpha of', "{:.2f}".format(alpha), 'degrees')
+        print('')
+        print('-----------------------------------------------------------------------------')
+        print('')
+
+        if distance <= 150 and alpha <= shipB.laserSpread:
             chaseInProgress = False
             caught = True
 
@@ -111,8 +160,10 @@ def main():
     print("Ship B final position: ")
     shipB.printPosition()
 
+    distance = calculateDistance(shipA, shipB)
+
     if caught:
-        print("Ship B caught ship A after", counter, "seconds")
+        print("Ship B caught ship A after", counter, "seconds; with distance of", "{:.2f}".format(distance), "meters between them")
     else:
         print("Ship A got away after ", counter, "seconds")
 
