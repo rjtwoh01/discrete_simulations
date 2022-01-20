@@ -126,10 +126,14 @@ def main():
             shipAThrustorsRemaining = shipAThrustorsRemaining - 1
             print('ShipA used a thrustor with', shipAThrustorsRemaining, 'remaining')
         
-        if shipB.coordinates.x > shipA.coordinates.x or shipB.coordinates.y > shipA.coordinates.y or shipB.coordinates.z > shipA.coordinates.z:
-            shipB.decreaseDistance()
+        if random.randrange(0,100) > 10:
+            if shipB.coordinates.x > shipA.coordinates.x or shipB.coordinates.y > shipA.coordinates.y or shipB.coordinates.z > shipA.coordinates.z:
+                shipB.decreaseDistance()
+            else:
+                shipB.increaseDistance()
         else:
-            shipB.increaseDistance()
+            print('ShipB encountered an astroid and is stuck for the next second')
+                
 
         
         if random.randrange(0,100) < shipA.thrusterLikelihood and shipAThrustorsRemaining == 0:
