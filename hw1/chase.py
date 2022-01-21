@@ -155,7 +155,7 @@ def main():
         ax.scatter3D(shipB.coordinates.x, shipB.coordinates.y, shipB.coordinates.z, color='red')
 
         plt.show(block=False)
-        plt.pause(2)
+        plt.pause(1)
 
         if distance <= 50 and alpha <= shipB.laserSpread:
             chaseInProgress = False
