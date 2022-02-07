@@ -33,5 +33,6 @@ for i in range(interval**2):
     valuesOfPi.append(pi)
     print(pi)
 
+print('Interval range:', interval, ", with total iterations:", interval**2)
 print('Final estimation of Pi=', pi)
 # print('total iterations:', len(valuesOfPi))
