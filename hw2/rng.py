@@ -1,15 +1,29 @@
 import math
 import time
 
-class RNG(object):
-    def __init__(self):
-        #The default seed, assuming the user doesn't provide one, will be the current system time in seconds
-        self.seed = time.time()
-        self.a = 69069
-        self.c = 1
-        self.prevValue = 0
+def lcg(x, a, c, m):
+    while True:
+        x = (a * x + c) % m
+        yield x
 
-    def rand(self):
-        #m_(i+1) = a * m_(i) + c mod(M) 
-        newRandomNumber = self.a * self.prevValue + self.c * math.modf()
-        return newRandomNumber
+def random_uniform_sample(n, interval, seed = time.time()):
+    a, c, m = 1103515245, 12345, 2 ** 31
+    #seed = 1644260284.448245
+    bsdrand = lcg(seed, a, c, m)
+
+    lower, upper = interval[0], interval[1]
+    sample = []
+
+    for i in range(n):
+        observation = (upper - lower) * (next(bsdrand) / (2 ** 31 - 1)) + lower
+        # sample.append(round(observation))
+        sample.append(observation)
+
+    return sample
+
+def main():
+    rus = random_uniform_sample(30, [-1, 1])
+    print(rus)
+
+if __name__ == "__main__":
+    main()
