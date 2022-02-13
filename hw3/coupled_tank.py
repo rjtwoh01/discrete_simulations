@@ -1,10 +1,3 @@
-from audioop import avg
-import math
-from re import L
-import struct
-import time
-import rng
-
 class Tank(object):
     def __init__(self):
         self.a = 0
