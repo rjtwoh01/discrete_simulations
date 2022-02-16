@@ -78,10 +78,12 @@ def main():
         numAsked += 20
         count += 1
     
-    averageRight = numCorrect / numAsked
-    averageRightPercentage = averageRight * 100
-    print('average percentage of questions answered correctly:', averageRightPercentage)
-    print('average number right:', averageRight)
+    probabilityRight = numCorrect / numAsked
+    probRightPercent = probabilityRight * 100
+    averageRight = numCorrect / len(correct)
+    print('percentage of questions answered correctly:', probRightPercent)
+    print('prob right:', probabilityRight)
+    print('average right:', averageRight)
     print('max value:', max(correct))
     print('min correct:', min(correct))
 
