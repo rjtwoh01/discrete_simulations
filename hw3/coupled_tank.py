@@ -30,7 +30,7 @@ def main():
     fin = float(input('Enter flow in for tank 1: '))
     fout = float(input('Enter flow out for tank 1: '))
     h = float(input('Enter starting height for tank 1: '))
-    tank1.a = a; tank1.fin = fin; tank1.fout = fout; tank1.h = h
+    tank1.a = a; tank1.fin = fin; tank1.fout = fout; tank1.height = h
     a = float(input('Enter area for tank 2: '))
     fin = float(input('Enter flow in for tank 2: '))
     fout = float(input('Enter flow out for tank 2: '))
@@ -44,6 +44,7 @@ def main():
         tank1.getHeight()
         tank2.getHeight()
         i += 1
+        if (tank1.height <= 0 or tank2.height <= 0): break;
     
     tank1.calculateStats(); tank2.calculateStats()
 
