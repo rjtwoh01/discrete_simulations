@@ -3,17 +3,18 @@ import struct
 import time
 import random
 import rng
+import distutils
 
 class Interview(object):
-    def __init__(self):
-        self.quiz = Quiz()
+    def __init__(self,lastOption=False):
+        self.quiz = Quiz(lastOption)
         #stuff
 
 class Quiz(object):
-    def __init__(self):
+    def __init__(self, lastOption=False):
         self.questions = []
         self.correct = 0
-        self.lastOption = False
+        self.lastOption = lastOption
         self.seed = time.time()
     
     def generateQuestions(self):
@@ -64,9 +65,10 @@ def main():
     numAsked = 0
 
     length = int(input('Input the number of interviews to run: '))
+    lastOption = distutils.util.strtobool(input('Last answer always true?: '))
 
     while count < length:
-        interview = Interview()
+        interview = Interview(lastOption)
         print('quiz:', count)
         interview.quiz.generateQuestions()
         interview.quiz.completeQuiz()
