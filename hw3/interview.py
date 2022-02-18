@@ -22,7 +22,7 @@ class Quiz(object):
         while i < 21:
             quiz = Question()
             if not self.lastOption: quiz.setCorrectAnswer(self.seed)
-            else: quiz.setCorrectAnswer(True)
+            else: quiz.setCorrectAnswer(self.lastOption)
             self.questions.append(quiz)
             self.seed += 1
             i += 1
