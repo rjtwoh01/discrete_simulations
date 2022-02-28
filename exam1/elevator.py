@@ -5,7 +5,7 @@ import random
 class Building(object):
     def __init__(self):
         self.floors = [1, 2, 3, 4]
-        self.floorPositions = [0, 1, 1.5, 1.75]
+        self.floorPositions = [0, 60, 90, 105]
         self.peopleWaiting = list()
         self.elevator = None #defined later
 
@@ -22,8 +22,11 @@ class Elevator(object):
         nearestFloor = 4
         for person in self.occupants:
             if person.destinationFloor < nearestFloor: 
+                # if (person.destinationFloor < 4): print(person.destinationFloor)
+                # print('adjusting nearestfloor')
                 nearestFloor = person.destinationFloor
 
+        # print(nearestFloor)
         return nearestFloor
 
     def exitElevator(self):
@@ -65,10 +68,11 @@ def simulation():
             newPerson.getDestination()
             building.peopleWaiting.append(newPerson) #add the person to the queue
 
-        while (len(elevator.occupants) < elevator.capacity and len(building.peopleWaiting) > 0 and elevator.currentFloor == 1 and elevator.currentPosition == 0):
-            # print('elevator occupants:',len(elevator.occupants))
-            # print('building occupants:',len(building.peopleWaiting))
+        while (len(elevator.occupants) < elevator.capacity and len(building.peopleWaiting) > 0 and elevator.currentPosition == 0):
+            print('elevator occupants:',len(elevator.occupants))
+            print('building occupants:',len(building.peopleWaiting))
             elevator.occupants.append(building.peopleWaiting.pop(0)) #remove person that arrived first and put them on the elevator
+            currentTime += 1
             # print('elevator occupants:',len(elevator.occupants))
             # print('building occupants:',len(building.peopleWaiting))
 
@@ -78,27 +82,34 @@ def simulation():
                 if takingStairs: building.peopleWaiting.remove(person) #if the person is taking the stairs then remove them from the queue
         
         #move the elevator up
-        nearestFloor = 1
-        reachedFloor = False
         if len(elevator.occupants) > 0:
             nearestFloor = elevator.getNearestFloor()
-        
-        print('nearestFloor=',nearestFloor)
+            # print(nearestFloor)
 
-        if  elevator.currentPosition not in building.floorPositions and elevator.currentPosition != 0:
-            elevator.currentPosition += .01
-            currentTime += 1
-        
-        if elevator.currentPosition in building.floorPositions:
-            elevator.currentFloor = building.floorPositions.index(elevator.currentPosition) + 1
-            if elevator.currentFloor == nearestFloor:
-                elevator.exitElevator()
+            if  elevator.currentPosition not in building.floorPositions or elevator.currentPosition == 0:
+                # print('elevator current position is not in the designated floor posistions')
+                elevator.currentPosition += 1
                 currentTime += 1
-            if elevator.currentFloor == 4: 
-                #Adjust for travel back down to the bottom
-                elevator.currentFloor = 1
-                elevator.currentPosition = 0
-                currentTime += 1.75
+            
+            # print(elevator.currentPosition)
+            if elevator.currentPosition in building.floorPositions:
+                elevator.currentFloor = building.floorPositions.index(elevator.currentPosition) + 1
+                
+                print('arriving at floor: ', elevator.currentFloor)
+                if elevator.currentFloor == nearestFloor and elevator.currentFloor != 4:
+                    elevator.exitElevator()
+                    currentTime += 30
+                    elevator.currentPosition += 1
+                elif elevator.currentFloor == 4:
+                    elevator.exitElevator() 
+                    #Adjust for travel back down to the bottom
+                    print('at top floor', len(elevator.occupants))
+                    elevator.currentFloor = 1
+                    elevator.currentPosition = 0
+                    currentTime += 145 #doors stay open for 30 seconds and then travel back down time
+                else:
+                    elevator.currentPosition += 1
+                    currentTime += 1
 
     print('hour elapsed')
     print('elevator occupants:',len(elevator.occupants))
