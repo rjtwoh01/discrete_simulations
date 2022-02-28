@@ -100,6 +100,9 @@ def simulation():
                     elevator.exitElevator()
                     currentTime += 30
                     elevator.currentPosition += 1
+                    if len(elevator.occupants) == 0:
+                        currentTime += elevator.currentPosition
+                        elevator.currentPosition = 0
                 elif elevator.currentFloor == 4:
                     elevator.exitElevator() 
                     #Adjust for travel back down to the bottom
@@ -110,6 +113,12 @@ def simulation():
                 else:
                     elevator.currentPosition += 1
                     currentTime += 1
+        elif elevator.currentPosition != 0 and elevator.currentPosition != 105:
+            currentTime += elevator.currentPosition 
+            elevator.currentPosition = 0
+        else: 
+            currentTime += 1 #we're waiting for people to show up and need the elevator
+            print('waiting for people at position:', elevator.currentPosition)
 
     print('hour elapsed')
     print('elevator occupants:',len(elevator.occupants))
