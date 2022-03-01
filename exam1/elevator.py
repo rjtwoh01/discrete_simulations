@@ -30,11 +30,7 @@ class Elevator(object):
         nearestFloor = 4
         for person in self.occupants:
             if person.destinationFloor < nearestFloor: 
-                # if (person.destinationFloor < 4): print(person.destinationFloor)
-                # print('adjusting nearestfloor')
                 nearestFloor = person.destinationFloor
-
-        # print(nearestFloor)
         return nearestFloor
 
     def exitElevator(self):
@@ -80,13 +76,9 @@ def simulation():
             building.peopleWaiting.append(newPerson) #add the person to the queue
 
         while (len(elevator.occupants) < elevator.capacity and len(building.peopleWaiting) > 0 and elevator.currentPosition == 0):
-            print('elevator occupants:',len(elevator.occupants))
-            print('building occupants:',len(building.peopleWaiting))
             building.waitTimeList.append(building.peopleWaiting[0].waitTime)
             elevator.occupants.append(building.peopleWaiting.pop(0)) #remove person that arrived first and put them on the elevator
             currentTime += 1
-            # print('elevator occupants:',len(elevator.occupants))
-            # print('building occupants:',len(building.peopleWaiting))
 
         if len(elevator.occupants) == elevator.capacity:
             for person in building.peopleWaiting:
@@ -97,18 +89,14 @@ def simulation():
         #move the elevator up
         if len(elevator.occupants) > 0:
             nearestFloor = elevator.getNearestFloor()
-            # print(nearestFloor)
 
             if  elevator.currentPosition not in building.floorPositions or elevator.currentPosition == 0:
-                # print('elevator current position is not in the designated floor posistions')
                 elevator.currentPosition += 1
                 currentTime += 1
             
-            # print(elevator.currentPosition)
             if elevator.currentPosition in building.floorPositions:
                 elevator.currentFloor = building.floorPositions.index(elevator.currentPosition) + 1
                 
-                print('arriving at floor: ', elevator.currentFloor)
                 if elevator.currentFloor == nearestFloor and elevator.currentFloor != 4:
                     elevator.exitElevator()
                     currentTime += 30
@@ -119,7 +107,6 @@ def simulation():
                 elif elevator.currentFloor == 4:
                     elevator.exitElevator() 
                     #Adjust for travel back down to the bottom
-                    print('at top floor', len(elevator.occupants))
                     elevator.currentFloor = 1
                     elevator.currentPosition = 0
                     currentTime += 145 #doors stay open for 30 seconds and then travel back down time
@@ -131,15 +118,30 @@ def simulation():
             elevator.currentPosition = 0
         else: 
             currentTime += 1 #we're waiting for people to show up and need the elevator
-            print('waiting for people at position:', elevator.currentPosition)
-
-    print('hour elapsed')
-    print('elevator occupants:',len(elevator.occupants))
-    print('building occupants:',len(building.peopleWaiting))
 
     return building
 
-
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 def main():
     simulationCount = int(input('Enter how many times to run the simulation: '))
@@ -147,10 +149,12 @@ def main():
     buildingList = list()
     averageWaitTimesList = []
 
+    printProgressBar(0, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
     while counter < simulationCount:
         building = simulation()
         buildingList.append(building)
-        counter +=1 
+        counter +=1
+        printProgressBar(counter, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
     print('ran: {0} times', counter)
     averageWaitTime = 0
