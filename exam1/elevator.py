@@ -2,6 +2,7 @@ from distutils.command.build import build
 from operator import indexOf
 import random
 import datetime
+import matplotlib.pyplot as plt
 
 class Building(object):
     def __init__(self):
@@ -9,6 +10,7 @@ class Building(object):
         self.floorPositions = [0, 60, 90, 105]
         self.peopleWaiting = list()
         self.waitTimeList = []
+        self.averageWaitTime = 0
         self.elevator = None #defined later
 
     def addToWaitTime(self, timeValue):
@@ -143,6 +145,7 @@ def main():
     simulationCount = int(input('Enter how many times to run the simulation: '))
     counter = 0
     buildingList = list()
+    averageWaitTimesList = []
 
     while counter < simulationCount:
         building = simulation()
@@ -154,10 +157,17 @@ def main():
     numberOfPeople = 0
     for building in buildingList:
         averageWaitTime += sum(building.waitTimeList)
+        building.averageWaitTime = sum(building.waitTimeList) / len(building.waitTimeList)
+        averageWaitTimesList.append(building.averageWaitTime)
         numberOfPeople += len(building.waitTimeList)
     averageWaitTime = averageWaitTime / numberOfPeople
 
     print('average wait time:', str(datetime.timedelta(seconds=int(averageWaitTime))))
+    plt.plot(list(range(1, simulationCount + 1)), averageWaitTimesList)
+    plt.title('Average Wait Times for Buildings (seconds)')
+    plt.xlabel('Building')
+    plt.ylabel('Avg Wait Time')
+    plt.show()
 
 
 if __name__ == "__main__":
