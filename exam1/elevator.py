@@ -1,13 +1,19 @@
 from distutils.command.build import build
 from operator import indexOf
 import random
+import datetime
 
 class Building(object):
     def __init__(self):
         self.floors = [1, 2, 3, 4]
         self.floorPositions = [0, 60, 90, 105]
         self.peopleWaiting = list()
+        self.waitTimeList = []
         self.elevator = None #defined later
+
+    def addToWaitTime(self, timeValue):
+        for person in self.peopleWaiting:
+            person.waitTime += timeValue
 
 
 class Elevator(object):
@@ -60,8 +66,11 @@ def simulation():
     elevator = Elevator()
     currentTime = 0 #Measured in seconds
     building.elevator = elevator
+    lastTimeCheck = 0
 
     while currentTime < 3600: #an hour
+        building.addToWaitTime(currentTime - lastTimeCheck)
+        lastTimeCheck = currentTime
         dieRoll = random.randint(1,101)
         if (dieRoll < 10): #chance of a person arriving at the building
             newPerson = Person()
@@ -71,6 +80,7 @@ def simulation():
         while (len(elevator.occupants) < elevator.capacity and len(building.peopleWaiting) > 0 and elevator.currentPosition == 0):
             print('elevator occupants:',len(elevator.occupants))
             print('building occupants:',len(building.peopleWaiting))
+            building.waitTimeList.append(building.peopleWaiting[0].waitTime)
             elevator.occupants.append(building.peopleWaiting.pop(0)) #remove person that arrived first and put them on the elevator
             currentTime += 1
             # print('elevator occupants:',len(elevator.occupants))
@@ -79,6 +89,7 @@ def simulation():
         if len(elevator.occupants) == elevator.capacity:
             for person in building.peopleWaiting:
                 takingStairs = person.determineIfLeave()
+                building.waitTimeList.append(person.waitTime)
                 if takingStairs: building.peopleWaiting.remove(person) #if the person is taking the stairs then remove them from the queue
         
         #move the elevator up
@@ -124,15 +135,29 @@ def simulation():
     print('elevator occupants:',len(elevator.occupants))
     print('building occupants:',len(building.peopleWaiting))
 
+    return building
+
 
 
 def main():
     simulationCount = int(input('Enter how many times to run the simulation: '))
     counter = 0
+    buildingList = list()
 
     while counter < simulationCount:
-        simulation()
+        building = simulation()
+        buildingList.append(building)
         counter +=1 
+
+    print('ran: {0} times', counter)
+    averageWaitTime = 0
+    numberOfPeople = 0
+    for building in buildingList:
+        averageWaitTime += sum(building.waitTimeList)
+        numberOfPeople += len(building.waitTimeList)
+    averageWaitTime = averageWaitTime / numberOfPeople
+
+    print('average wait time:', str(datetime.timedelta(seconds=int(averageWaitTime))))
 
 
 if __name__ == "__main__":
