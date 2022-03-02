@@ -3,6 +3,7 @@ from operator import indexOf
 import random
 import datetime
 import matplotlib.pyplot as plt
+import numpy as np
 
 class Building(object):
     def __init__(self):
@@ -10,6 +11,9 @@ class Building(object):
         self.floorPositions = [0, 60, 90, 105]
         self.peopleWaiting = list()
         self.waitTimeList = []
+        self.walksToFloors = [0, 0, 0] #how many people go to the first, second, and third floors
+        self.workersAtTimeBlocks = [0, 0, 0] #8:30, 8:45, 9:00
+        self.lastBoardTime = 0
         self.averageWaitTime = 0
         self.elevator = None #defined later
 
@@ -84,7 +88,10 @@ def simulation():
             for person in building.peopleWaiting:
                 takingStairs = person.determineIfLeave()
                 building.waitTimeList.append(person.waitTime)
-                if takingStairs: building.peopleWaiting.remove(person) #if the person is taking the stairs then remove them from the queue
+                if takingStairs:
+                    floorIndex = building.floors.index(person.destinationFloor - 1) #get the index of the floor the person is going to, shifted for array
+                    building.walksToFloors[floorIndex] += 1
+                    building.peopleWaiting.remove(person) #if the person is taking the stairs then remove them from the queue
         
         #move the elevator up
         if len(elevator.occupants) > 0:
@@ -122,6 +129,7 @@ def simulation():
     return building
 
 # Print iterations progress
+#Src: https://stackoverflow.com/a/34325723
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '█', printEnd = "\r"):
     """
     Call in a loop to create terminal progress bar
@@ -159,18 +167,39 @@ def main():
     print('ran: {0} times', counter)
     averageWaitTime = 0
     numberOfPeople = 0
+    averageWalksToSecond = []
+    averageWalksToThird = []
+    averageWalksToFourth = []
     for building in buildingList:
         averageWaitTime += sum(building.waitTimeList)
         building.averageWaitTime = sum(building.waitTimeList) / len(building.waitTimeList)
         averageWaitTimesList.append(building.averageWaitTime)
         numberOfPeople += len(building.waitTimeList)
+        averageWalksToSecond.append(building.walksToFloors[0])
+        averageWalksToThird.append(building.walksToFloors[1])
+        averageWalksToFourth.append(building.walksToFloors[2])
+
     averageWaitTime = averageWaitTime / numberOfPeople
 
+    averageWalksToSecondSum = sum(averageWalksToSecond) / simulationCount
+    averageWalksToThirdSum = sum(averageWalksToThird) / simulationCount
+    averageWalksToFourthSum = sum(averageWalksToFourth) / simulationCount
+
+    walkingList = [averageWalksToSecondSum, averageWalksToThirdSum, averageWalksToFourthSum]
+
     print('average wait time:', str(datetime.timedelta(seconds=int(averageWaitTime))))
+
+    plt.figure(1)
     plt.plot(list(range(1, simulationCount + 1)), averageWaitTimesList)
     plt.title('Average Wait Times for Buildings (seconds)')
     plt.xlabel('Building')
     plt.ylabel('Avg Wait Time')
+
+    plt.figure(2)
+    plt.plot([2, 3, 4], walkingList)
+    plt.title('Average People Walking, n = ' + str(simulationCount))
+    plt.xlabel('Floors')
+    plt.ylabel('People Walking')
     plt.show()
 
 
