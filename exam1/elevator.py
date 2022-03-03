@@ -16,6 +16,7 @@ class Building(object):
         self.lastBoardTime = 0
         self.averageWaitTime = 0
         self.elevator = None #defined later
+        self.lastBoardTime = 0
 
     def addToWaitTime(self, timeValue):
         for person in self.peopleWaiting:
@@ -73,6 +74,7 @@ def simulation():
     timeBlockIndex = 0
     doTimeBlock = False
     timeValues = [1800, 2700, 3600]
+    lastBoardTime = 0
 
     while currentTime < 3600: #an hour
         building.addToWaitTime(currentTime - lastTimeCheck)
@@ -93,6 +95,7 @@ def simulation():
             building.waitTimeList.append(building.peopleWaiting[0].waitTime)
             elevator.occupants.append(building.peopleWaiting.pop(0)) #remove person that arrived first and put them on the elevator
             currentTime += 1
+            lastBoardTime = currentTime
 
         if len(elevator.occupants) == elevator.capacity:
             for person in building.peopleWaiting:
@@ -143,6 +146,7 @@ def simulation():
             currentTime += 1 #we're waiting for people to show up and need the elevator
 
     building.workersAtTimeBlocks[2] = len(building.peopleWaiting)
+    building.lastBoardTime = lastBoardTime
     return building
 
 # Print iterations progress
@@ -190,6 +194,7 @@ def main():
     averageAt830 = 0
     averageAt845 = 0
     averageAt9 = 0
+    lastBoardTimeList = []
     for building in buildingList:
         averageWaitTime += sum(building.waitTimeList)
         building.averageWaitTime = sum(building.waitTimeList) / len(building.waitTimeList)
@@ -201,6 +206,8 @@ def main():
         averageAt830 += building.workersAtTimeBlocks[0]
         averageAt845 += building.workersAtTimeBlocks[1]
         averageAt9 += building.workersAtTimeBlocks[2]
+        lastBoardTimeList.append(building.lastBoardTime)
+
 
     averageWaitTime = averageWaitTime / numberOfPeople
     print('average wait time:', averageWaitTime)
@@ -221,7 +228,7 @@ def main():
 
     plt.figure(1)
     plt.hist(averageWaitTimesList, int(max(averageWaitTimesList)))
-    plt.title('Average Wait Times for Buildings (seconds)')
+    plt.title('Average Wait Times for Buildings (seconds), n = ' + str(simulationCount))
     plt.xlabel('Avg Wait Time')
     plt.ylabel('Distribution')
 
@@ -237,6 +244,12 @@ def main():
     plt.title('Average People Waiting, n = ' + str(simulationCount))
     plt.xlabel('People Waiting')
     plt.ylabel('Count')
+
+    plt.figure(4)
+    plt.hist(lastBoardTimeList, int(max(lastBoardTimeList)))
+    plt.title('Last Board Time (seconds), n = ' + str(simulationCount))
+    plt.xlabel('Last Board Time')
+    plt.ylabel('Distribution')
 
     plt.show()
 
