@@ -63,21 +63,31 @@ class Person(object):
         if dieRoll < chanceOfLeave: return True
         else: return False
 
+
 def simulation():
     building =  Building()
     elevator = Elevator()
     currentTime = 0 #Measured in seconds
     building.elevator = elevator
     lastTimeCheck = 0
+    timeBlockIndex = 0
+    doTimeBlock = False
+    timeValues = [1800, 2700, 3600]
 
     while currentTime < 3600: #an hour
         building.addToWaitTime(currentTime - lastTimeCheck)
         lastTimeCheck = currentTime
+
         dieRoll = random.randint(1,101)
         if (dieRoll < 10): #chance of a person arriving at the building
             newPerson = Person()
             newPerson.getDestination()
             building.peopleWaiting.append(newPerson) #add the person to the queue
+
+        if doTimeBlock or currentTime in timeValues:
+            building.workersAtTimeBlocks[timeBlockIndex] = len(building.peopleWaiting)
+            timeBlockIndex += 1
+            doTimeBlock = False
 
         while (len(elevator.occupants) < elevator.capacity and len(building.peopleWaiting) > 0 and elevator.currentPosition == 0):
             building.waitTimeList.append(building.peopleWaiting[0].waitTime)
@@ -106,6 +116,9 @@ def simulation():
                 
                 if elevator.currentFloor == nearestFloor and elevator.currentFloor != 4:
                     elevator.exitElevator()
+
+                    for i in range(currentTime, currentTime + 30): 
+                        if i in timeValues: doTimeBlock = True
                     currentTime += 30
                     elevator.currentPosition += 1
                     if len(elevator.occupants) == 0:
@@ -116,7 +129,10 @@ def simulation():
                     #Adjust for travel back down to the bottom
                     elevator.currentFloor = 1
                     elevator.currentPosition = 0
+                    for i in range(currentTime, currentTime + 145): 
+                        if i in timeValues: doTimeBlock = True
                     currentTime += 145 #doors stay open for 30 seconds and then travel back down time
+
                 else:
                     elevator.currentPosition += 1
                     currentTime += 1
@@ -126,6 +142,7 @@ def simulation():
         else: 
             currentTime += 1 #we're waiting for people to show up and need the elevator
 
+    building.workersAtTimeBlocks[2] = len(building.peopleWaiting)
     return building
 
 # Print iterations progress
@@ -164,12 +181,15 @@ def main():
         counter +=1
         printProgressBar(counter, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
-    print('ran: {0} times', counter)
+    print('ran:', counter, 'counter')
     averageWaitTime = 0
     numberOfPeople = 0
     averageWalksToSecond = []
     averageWalksToThird = []
     averageWalksToFourth = []
+    averageAt830 = 0
+    averageAt845 = 0
+    averageAt9 = 0
     for building in buildingList:
         averageWaitTime += sum(building.waitTimeList)
         building.averageWaitTime = sum(building.waitTimeList) / len(building.waitTimeList)
@@ -178,28 +198,46 @@ def main():
         averageWalksToSecond.append(building.walksToFloors[0])
         averageWalksToThird.append(building.walksToFloors[1])
         averageWalksToFourth.append(building.walksToFloors[2])
+        averageAt830 += building.workersAtTimeBlocks[0]
+        averageAt845 += building.workersAtTimeBlocks[1]
+        averageAt9 += building.workersAtTimeBlocks[2]
 
     averageWaitTime = averageWaitTime / numberOfPeople
+    print('average wait time:', averageWaitTime)
 
     averageWalksToSecondSum = sum(averageWalksToSecond) / simulationCount
     averageWalksToThirdSum = sum(averageWalksToThird) / simulationCount
     averageWalksToFourthSum = sum(averageWalksToFourth) / simulationCount
 
+    averageAt830 = averageAt830 / simulationCount
+    averageAt845 = averageAt845 / simulationCount
+    averageAt9 = averageAt9 / simulationCount
+
+
     walkingList = [averageWalksToSecondSum, averageWalksToThirdSum, averageWalksToFourthSum]
+    waitingList = [averageAt830, averageAt845, averageAt9]
 
     print('average wait time:', str(datetime.timedelta(seconds=int(averageWaitTime))))
 
     plt.figure(1)
-    plt.plot(list(range(1, simulationCount + 1)), averageWaitTimesList)
+    plt.hist(averageWaitTimesList, int(max(averageWaitTimesList)))
     plt.title('Average Wait Times for Buildings (seconds)')
-    plt.xlabel('Building')
-    plt.ylabel('Avg Wait Time')
+    plt.xlabel('Avg Wait Time')
+    plt.ylabel('Distribution')
 
     plt.figure(2)
     plt.plot([2, 3, 4], walkingList)
     plt.title('Average People Walking, n = ' + str(simulationCount))
     plt.xlabel('Floors')
     plt.ylabel('People Walking')
+
+
+    plt.figure(3)
+    plt.plot(['8:30', '8:45', '9:00'], waitingList)
+    plt.title('Average People Waiting, n = ' + str(simulationCount))
+    plt.xlabel('People Waiting')
+    plt.ylabel('Count')
+
     plt.show()
 
 
