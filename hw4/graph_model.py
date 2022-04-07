@@ -61,7 +61,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print()
 
-# print(find_all_paths(graph, 1, 7))
 traversalTime = []
 print(getGraph())
 count = 0
@@ -89,7 +88,6 @@ while count < simulationCount:
                 values = (runGraph[i][j])
                 runGraph[i][j] = random.randrange(values[0], values[1])
 
-    # print(runGraph)
     run = []
     #traverse getting total distances for the whole path
     for path in pathList:
@@ -112,7 +110,6 @@ while count < simulationCount:
     count += 1
     printProgressBar(count, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
 
-# print(runs)
 
 pathResults = []
 pathDistances = [0, 0, 0, 0, 0]
@@ -125,11 +122,7 @@ for run in runs:
         counter += 1
     pathResults.append(innerSums)
 
-# print(pathResults)
 print(pathDistances)
-# for results in pathResults:
-#     counter = 0
-#     for distance in results:
 
 for i in range(len(pathDistances)):
     pathDistances[i] = round(pathDistances[i] / simulationCount, 2)
