@@ -1,20 +1,16 @@
 import random
 
 # Start node: [ {Destination Nodes : Travel Time}] where travel time = constant OR tuple
-graph = {
-    1: {2: (3, 5), 5: 6},
-    2: {3: 6, 4: (7, 9)},
-    3: {4: (5, 8)},
-    4: {7: 4},
-    5: {3: 7, 4: 9, 6: (7, 10)},
-    6: {7: (8, 12)}
-}
-
-traversalTimes = {
-    '1,2': (3,5),
-    '1, 5': (6)
-}
-
+def getGraph():
+    graph = {
+        1: {2: (3, 5), 5: 6},
+        2: {3: 6, 4: (7, 9)},
+        3: {4: (5, 8)},
+        4: {7: 4},
+        5: {3: 7, 4: 9, 6: (7, 10)},
+        6: {7: (8, 12)}
+    }
+    return graph;
 
 def find_path(graph, start, end, path=[]):
     path = path + [start]
@@ -64,30 +60,49 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     if iteration == total: 
         print()
 
-print(find_all_paths(graph, 1, 7))
+# print(find_all_paths(graph, 1, 7))
 traversalTime = []
-print(graph)
-
+print(getGraph())
 count = 0
 simulationCount = int(input('Enter how many times to run the simulation: '))
 printProgressBar(0, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
+runs = []
+pathList = find_all_paths(getGraph(), 1, 7)
+
 while count < simulationCount: 
-    pathList = find_all_paths(graph, 1, 7)
+    runGraph = dict()
+    runGraph.update(getGraph()) #shallow copy, values only
+    #get distance for all indeterministic paths
+    for i in runGraph:
+        for j in runGraph[i]:
+            if type(runGraph[i][j]) == tuple:
+                values = (runGraph[i][j])
+                runGraph[i][j] = random.randrange(values[0], values[1])
+
+    # print(runGraph)
+    run = []
+    #traverse getting total distances for the whole path
     for path in pathList:
-        # print(path)
         parentNode = path[0]
-        # print(parentNode)
-        # nodeIndex = 0
+        pathDistances = []
         for node in path:
             if node != 1 & parentNode != 7:
-                # graphIndex = list(graph).index(parentNode)
-                graphNode = graph[parentNode]
-                # print('graphNode:',graphNode)
-                # print('parentNode:',parentNode)
-                # print('node:',node)
+                graphNode = runGraph[parentNode]
                 value = graphNode[node]
-                # print('value:',value)
+                pathDistances.append(value)
                 parentNode = node
-            # print('node before update:', node)
+        run.append(pathDistances)
+    runs.append(run)
     count += 1
     printProgressBar(count, simulationCount, prefix = 'Progress:', suffix = 'Complete', length = 50)
+
+# print(runs)
+
+pathResults = []
+for run in runs:
+    innerSums = []
+    for path in run:
+        innerSums.append(sum(path))
+    pathResults.append(innerSums)
+
+print(pathResults)
