@@ -1,4 +1,5 @@
 import random
+import matplotlib.pyplot as plt
 
 # Start node: [ {Destination Nodes : Travel Time}] where travel time = constant OR tuple
 def getGraph():
@@ -99,10 +100,43 @@ while count < simulationCount:
 # print(runs)
 
 pathResults = []
+pathDistances = [0, 0, 0, 0, 0]
 for run in runs:
     innerSums = []
+    counter = 0
     for path in run:
         innerSums.append(sum(path))
+        pathDistances[counter] += sum(path)
+        counter += 1
     pathResults.append(innerSums)
 
-print(pathResults)
+# print(pathResults)
+print(pathDistances)
+# for results in pathResults:
+#     counter = 0
+#     for distance in results:
+
+for i in range(len(pathDistances)):
+    pathDistances[i] = round(pathDistances[i] / simulationCount, 2)
+
+print(pathDistances)
+
+
+x = []
+for path in pathList:
+    pathString = "("
+    for element in path:
+        pathString += str(element) 
+        if element != path[-1]: 
+            pathString += ", "
+    pathString += ")"
+    x.append(pathString)
+print(x)
+x_pos = [i for i, _ in enumerate(x)]
+plt.bar(x_pos, pathDistances)
+plt.title('Average distance for paths')
+plt.xlabel('Path')
+plt.ylabel('Distance')
+plt.xticks(x_pos, x)
+
+plt.show()
