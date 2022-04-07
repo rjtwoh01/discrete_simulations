@@ -70,6 +70,15 @@ printProgressBar(0, simulationCount, prefix = 'Progress:', suffix = 'Complete', 
 runs = []
 pathList = find_all_paths(getGraph(), 1, 7)
 
+innerPathDistances = {
+    1: {2: 0, 5: 0},
+    2: {3: 0, 4: 0},
+    3: {4: 0},
+    4: {7: 0},
+    5: {3: 0, 4: 0, 6: 0},
+    6: {7: 0}
+}
+
 while count < simulationCount: 
     runGraph = dict()
     runGraph.update(getGraph()) #shallow copy, values only
@@ -90,6 +99,12 @@ while count < simulationCount:
             if node != 1 & parentNode != 7:
                 graphNode = runGraph[parentNode]
                 value = graphNode[node]
+                count = 1
+                newDistanceValue = value
+                if type(innerPathDistances[parentNode][node]) == tuple:
+                     count = innerPathDistances[parentNode][node][1] + 1
+                     newDistanceValue = innerPathDistances[parentNode][node][0] + value
+                innerPathDistances[parentNode][node] = (newDistanceValue, count)
                 pathDistances.append(value)
                 parentNode = node
         run.append(pathDistances)
@@ -120,7 +135,13 @@ for i in range(len(pathDistances)):
     pathDistances[i] = round(pathDistances[i] / simulationCount, 2)
 
 print(pathDistances)
+print(innerPathDistances)
 
+for i in innerPathDistances:
+    for j in innerPathDistances[i]:
+        innerPathDistances[i][j] = round(innerPathDistances[i][j][0] / (innerPathDistances[i][j][1]), 2)
+
+print(innerPathDistances)
 
 x = []
 for path in pathList:
