@@ -31,14 +31,27 @@ def simulation():
             for employee in employeeList:
                 #open existingMessages
                 print(employee.messages)
+                for message in employee.messages:
+                    #you can only get infected once per day
+                    infectedThisTime = False
+                    infectionTransmission = random.randint(0, 100)
+                    if message == 'virus' and not infectedThisTime and infectionTransmission < 40:
+                        employee.computer.infectedCount += 1
+                        infectedThisTime = True
+                        if employee.computer not in infectedComputers:
+                            infectedComputers.append(employee.computer)
+                    employee.messages.remove(message)
 
                 #send out new messages
                 messagesSent = []
+                #once a computer has been infected twice it will no longer forward the virus
                 messageContents = "virus" if 1 <= employee.computer.infectedCount <= 2 else "normal"
                 while len(messagesSent) < 3:
                     employeeIndex = random.randint(0, len(employeeList) - 1)
                     if (employeeIndex not in messagesSent) & (employeeIndex != employeeList.index(employee)):
                         messagesSent.append(employeeIndex)
                         employeeList[employeeIndex].messages.append(messageContents)
+    
+    print('total number of computers infected:', len(infectedComputers))
 
 simulation()
